@@ -1,0 +1,25 @@
+{
+  "name": "BA_CONNECT_BACKEND",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build",
+    "start": "nodemon index.js -e .js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.171.0",
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "images": "^3.2.4",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.6.1",
+    "nodemon": "^2.0.20"
+  }
+}
