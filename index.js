@@ -13,6 +13,7 @@ const branchRoutes = require("./routes/branchRoutes");
 const userRoutes = require("./routes/userRoutes");
 const subsitesRoutes = require("./routes/subSitesRoutes");
 const folderRoutes = require("./routes/folderRoutes");
+const corporateRoutes = require("./routes/corporateRoutes");
 
 const PORT = process.env.PORT ? process.env.PORT : 9000;
 
@@ -30,6 +31,7 @@ app.use("/branch", branchRoutes);
 app.use("/user", userRoutes);
 app.use("/lo", subsitesRoutes);
 app.use("/folders", folderRoutes);
+app.use("/corporate", corporateRoutes);
 
 //here we are creating static folder to server our pages in the production
 app.use(express.static(path.join(__dirname, "public")));

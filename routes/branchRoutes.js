@@ -10,8 +10,8 @@ const branchController = require("../controllers/BranchController");
 router.post("/createnewbranch", branchController.createNewBranch);
 // // function for getting branch Id
 // router.post("/getsitedetails", branchController.getSiteDetails);
-// router.post("/postblogtodb", branchController.postBlogToDb);
-// router.post("/getpostbytid", branchController.getPostByID);
+router.post("/postblogtodb", branchController.postBlogToDb);
+router.get("/getpostbytid", branchController.getPostByID);
 // router.post("/addbranchurl", branchController.addBranchUrl);
 // router.get(
 //   "/withoutemailbranches",

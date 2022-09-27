@@ -5,6 +5,6 @@ const CorporateController = require("../controllers/CorporateController");
 
 Router.get("/", CorporateController.showAllCorporates);
 Router.post("/create", CorporateController.createNewCorporate);
-Router.post("/getcorporateid", CorporateController.getCorporateId);
+Router.post("/getcorporateid", CorporateController.getCorporatedId);
 
 module.exports = Router;

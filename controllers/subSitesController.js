@@ -6,10 +6,11 @@ const addNewLo = async (req, res) => {
   const { websiteUrl, branchUrl, subSiteName, subSiteEmail } = req.body;
   try {
     const branch = await Branch.findOne({ websiteUrl: branchUrl });
+
     if (branch) {
       try {
         const newSubsite = await new Subsites({
-          branchId: branch.branchId,
+          branchId: branch._id,
           websiteUrl: `https://${websiteUrl}`,
           subSiteEmail,
           subSiteName,
