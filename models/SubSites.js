@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const subSitesSchema = new mongoose.Schema({
   branchId: { type: String },
   corporateId: { type: String },
-  subSiteEmail: { type: String, required: true },
-  subSiteName: { type: String, required: true },
+  subSiteEmail: { type: String },
+  subSiteName: { type: String },
   location: { type: String },
-  websiteUrl: { type: String, required: true },
+  websiteUrl: { type: String },
 });
 const SubSite = mongoose.model("SubSite", subSitesSchema);
 module.exports = SubSite;

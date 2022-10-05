@@ -7,17 +7,19 @@ const PostMeta = require("../models/PostMeta");
 const Branch = require("../models/Branch");
 const SubSite = require("../models/SubSites");
 const BlogPost = require("../models/BlogPost");
+const Corporate = require("../models/Corporate");
 
 const createNewBranch = async (req, res) => {
-  const { branchEmail, location, websiteUrl, corporateId } = req.body;
   try {
+    const { branchEmail, location, websiteUrl, corporateId, branchName } =
+      req.body;
     const data = await new Branch({
       branchEmail,
       location,
       websiteUrl,
       corporateId,
+      branchName,
     }).save();
-
     const allAffiliates = await axios.get(
       `https://${data.websiteUrl}/?rest_route=/connectexpress/v1/getsites/`
     );
@@ -178,7 +180,7 @@ const getPostByID = async (req, res) => {
         message: "No ID provided",
       });
     }
-    const blog = await BlogPost.find({ _id: post_id });
+    const blog = await BlogPost.findOne({ _id: post_id });
     if (!blog) {
       res.send({
         success: false,
@@ -188,10 +190,9 @@ const getPostByID = async (req, res) => {
     const publishedBlog = await BlogPost.findByIdAndUpdate(blog._id, {
       postStatus: "published",
     });
-    console.log(pu);
     if (publishedBlog) {
-      const postmeta = await PostMeta.find({
-        postId: publishedBlog.postId,
+      const postmeta = await PostMeta.findOne({
+        postId: publishedBlog._id,
       }).select({
         yoastFbTitle: 0,
         yoastFbDesc: 0,
@@ -199,13 +200,14 @@ const getPostByID = async (req, res) => {
         yoastFbImageId: 0,
         _id: 0,
       });
-      const openGraphData = await PostMeta.find({
-        postId: publishedBlog.postId,
+      const openGraphData = await PostMeta.findOne({
+        postId: publishedBlog._id,
       }).select({
         yoastFbTitle: 1,
         yoastFbDesc: 1,
         yoastFbImage: 1,
         yoastFbImageId: 1,
+        postId: 1,
         _id: 0,
       });
       if (postmeta && openGraphData)
@@ -232,13 +234,152 @@ const getPostByID = async (req, res) => {
   }
 };
 
+const getSiteDetails = async (req, res) => {
+  const { websiteUrl } = req.body;
+  try {
+    const corporate = await Corporate.findOne({ websiteUrl });
+    if (corporate) {
+      return res.send({
+        success: true,
+        site_details: corporate,
+        site_id: corporate._id,
+        site_type: "Corporate",
+      });
+    } else {
+      const branch = await Branch.findOne({ websiteUrl });
+      if (branch) {
+        return res.send({
+          success: true,
+          site_details: branch,
+          site_id: branch._id,
+          site_type: "Branch",
+        });
+      } else {
+        const subsite = await SubSite.findOne({ websiteUrl });
+        if (subsite) {
+          return res.send({
+            success: true,
+            site_details: subsite,
+            site_id: subsite._id,
+            site_type: "Subsite/Corporate",
+          });
+        } else {
+          return res.send({
+            success: false,
+            error:
+              "The provided websiteUrl has no matched field in the records",
+          });
+        }
+      }
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+      message: "something bad has happened",
+    });
+  }
+};
+
+const addBranchUrl = async (req, res) => {
+  const { branchName, siteUrl } = req.body;
+  try {
+    const branchUpdated = await Branch.updateOne(
+      { branchName },
+      { websiteUrl: siteUrl }
+    );
+    if (branchUpdated) {
+      return res.send({
+        success: true,
+        message: "branch is updated with the websiteUrl",
+      });
+    } else {
+      return res.send({ success: false, error: "branch not found" });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+      message: "something bad has happened",
+    });
+  }
+};
+
+const getBranchesWithoutAssociatedEmail = async (req, res) => {
+  try {
+    const branch = await Branch.find({
+      $or: [{ branchEmail: "" }, { branchEmail: null }],
+    });
+    if (branch.length !== 0) {
+      return res.send({ success: true, branches_without_email: branch });
+    } else {
+      return res.send({
+        message: "branches without email associated not found",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+      message: "something bad has happened",
+    });
+  }
+};
+
+const getAllBranches = async (req, res) => {
+  try {
+    const allBranches = await Branch.find({});
+    if (allBranches.length !== 0) {
+      return res.send({
+        success: true,
+        branhes: allBranches,
+      });
+    } else {
+      return res.send({ success: false, error: "branches not found" });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+      message: "something bad has happened",
+    });
+  }
+};
+
+const approveAndScheduleBlogPost = async (req, res) => {
+  try {
+    const { postId } = req.body;
+    const approved = await BlogPost.findByIdAndUpdate(
+      { _id: postId },
+      { postStatusSyndication: "3" }
+    );
+    if (approved) {
+      return res.send({
+        success: true,
+        message: "post status updated successfully",
+      });
+    } else {
+      return res.send({
+        success: false,
+        error: "post with the given id not found",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+      message: "something bad has happened",
+    });
+  }
+};
+
 module.exports = {
   createNewBranch,
   postBlogToDb,
   getPostByID,
-  // getSiteDetails,
-  // addBranchUrl,
-  // getBranchesWithoutAssociatedEmail,
-  // getAllBranches,
-  // approveAndScheduleBlogPost,
+  getSiteDetails,
+  addBranchUrl,
+  getBranchesWithoutAssociatedEmail,
+  getAllBranches,
+  approveAndScheduleBlogPost,
 };
